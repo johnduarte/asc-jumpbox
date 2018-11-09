@@ -1,0 +1,8 @@
+---
+- hosts: hosts
+  remote_user: ubuntu
+  tasks:
+    - name: Clone rpc-openstack repo
+      git:
+        repo: https://github.com/rcbops/rpco-test-deploy-images
+        dest: $HOME/rpco-test-deploy-images

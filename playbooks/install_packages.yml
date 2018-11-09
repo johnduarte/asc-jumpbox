@@ -1,0 +1,13 @@
+- hosts: hosts
+  user: ubuntu
+  become: True
+  tasks:
+    - name: Update repositories cache and install package dependencies
+      apt:
+        name: "{{ item }}"
+        update_cache: yes
+      with_items:
+        - git-core
+        - screen
+        - tmux
+        - ansible

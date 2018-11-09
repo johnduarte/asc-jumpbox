@@ -1,0 +1,82 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: False
+  vars_prompt:
+    - name: 'vm_keyname'
+      prompt: "Enter Phobos keyname to provision the jump box with"
+      private: no
+
+  tasks:
+    - name: Create inventory directory
+      file:
+        path: "{{ inventory_path }}"
+        state: directory
+
+    - name: Print instance name
+      debug:
+        msg: "Preparing to deploy - {{ instance_name }}"
+
+    - name: Provision a cloud instance
+      block:
+        - name: Provision a cloud instance
+          os_server:
+            name: "{{ instance_name }}"
+            flavor: "{{ flavor }}"
+            state: present
+            image: "{{ image }}"
+            key_name: "{{ vm_keyname }}"
+            userdata: |
+              {%- raw -%}#!/bin/bash
+              apt-get update
+              apt-get install -y python-minimal python2.7
+              {% endraw %}
+            network: "{{ network }}"
+            config_drive: yes
+            meta:
+              build_config: core
+            wait: yes
+            timeout: "{{ boot_timeout }}"
+          register: _instance_provision
+
+        - name: Write inventory
+          copy:
+            content: |
+              [job_nodes:children]
+              hosts
+
+              [hosts]
+              {{ _instance_provision.server.name }} ansible_host={{ _instance_provision.server.accessIPv4 }} ansible_user=ubuntu rax_region={{ _instance_provision.server.region }}
+            dest: '{{ inventory_path }}/hosts'
+
+        - name: Wait for SSH connectivity to the cloud instance (10 min timeout)
+          wait_for:
+            timeout: 600
+            port: 22
+            host: "{{ _instance_provision.server.accessIPv4 }}"
+            sleep: 10
+            search_regex: "OpenSSH"
+
+      rescue:
+        - name: Ensure instance is removed.
+          os_server:
+            name: "{{ instance_name }}"
+            state: absent
+            wait: yes
+            timeout: "{{ boot_timeout }}"
+
+    - name: Show results of instance provision task
+      debug:
+        var: _instance_provision
+
+    - name: Add Host
+      add_host:
+        hostname: "hosts"
+        ansible_ssh_host: "{{ _instance_provision.server.accessIPv4 }}"
+
+    - name: Show generated inventory
+      debug:
+        msg: "Generated inventory: {{ lookup('file', inventory_path+'/hosts')}}"
+
+    - name: sleep for 3 minutes for bootstrap script to complete
+      wait_for: timeout=180

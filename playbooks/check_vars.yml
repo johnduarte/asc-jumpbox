@@ -1,0 +1,15 @@
+- hosts: localhost
+  tasks:
+    - name: Check for Phobos user in ENV
+      fail: msg="You must source your Phobos openrc credentials before running this play."
+      when:
+        - (p_user is undefined) or
+          (p_user is none) or
+          (p_user | trim == "")
+
+    - name: Check for Phobos password in ENV
+      fail: msg="You must source your Phobos openrc credentials before running this play."
+      when:
+        - (p_pass is undefined) or
+          (p_pass is none) or
+          (p_pass | trim == "")

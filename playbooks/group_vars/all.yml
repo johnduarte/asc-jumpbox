@@ -1,0 +1,13 @@
+---
+# These variables are expected to be defined by the user at the time of
+# execution.
+p_user: "{{ lookup('env','OS_USERNAME') | mandatory }}"
+p_pass: "{{ lookup('env','OS_PASSWORD') | mandatory }}"
+
+# Instance creation variables
+inventory_path: "{{ playbook_dir }}/../inventory"
+boot_timeout: "{{ lookup('env', 'BOOT_TIMEOUT') | default(900, true) }}"
+instance_name: "{{ p_user }}-jumpbox"
+image: "Ubuntu 18.04"
+flavor: "m1.small"
+network: "ironic"
