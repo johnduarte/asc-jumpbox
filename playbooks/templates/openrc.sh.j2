@@ -12,12 +12,12 @@ export OS_ENDPOINT_TYPE=internalURL
 export OS_INTERFACE=internalURL
 export OS_USERNAME="{{ p_user }}"
 export OS_PASSWORD="{{ p_pass }}"
-export OS_PROJECT_NAME="rpc-asc-project"
-export OS_TENANT_NAME="rpc-asc-project"
+export OS_PROJECT_NAME="{{ p_project }}"
+export OS_TENANT_NAME="{{ p_tenant }}"
 export OS_AUTH_URL=http://172.20.4.10:5000/v3
 export OS_NO_CACHE=1
-export OS_USER_DOMAIN_NAME="rpc-asc-domain"
-export OS_PROJECT_DOMAIN_NAME="rpc-asc-domain"
+export OS_USER_DOMAIN_NAME="{{ p_user_domain }}"
+export OS_PROJECT_DOMAIN_NAME="{{ p_project_domain }}"
 export OS_REGION_NAME=RegionOne
 
 # For openstackclient

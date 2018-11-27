@@ -5,6 +5,10 @@ vm_keyname: "{{ keyname }}"
 p_user: "{{ lookup('env','OS_USERNAME') | mandatory }}"
 username: "{{ p_user }}"
 p_pass: "{{ lookup('env','OS_PASSWORD') | mandatory }}"
+p_project: "{{ lookup('env','OS_PROJECT_NAME') | mandatory }}"
+p_project_domain: "{{ lookup('env','OS_PROJECT_DOMAIN_NAME') | mandatory }}"
+p_user_domain: "{{ lookup('env','OS_USER_DOMAIN_NAME') | mandatory }}"
+p_tenant: "{{ lookup('env','OS_TENANT_NAME') | mandatory }}"
 
 # Instance creation variables
 inventory_path: "{{ playbook_dir }}/../inventory"
