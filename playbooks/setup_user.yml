@@ -1,18 +1,44 @@
 - hosts: hosts
   user: ubuntu
+  become: True
   vars_prompt:
     - name: 'ssh_private_key'
       prompt: "Enter path to SSH private key to copy to jump box"
+      private: no
   tasks:
+    - name: Ensure user
+      user:
+        name: "{{ username }}"
+        state: present
+        create_home: True
+
+    - name: Ensure .ssh directory
+      file:
+        path: "/home/{{ username }}/.ssh"
+        owner: "{{ username }}"
+        group: "{{ username }}"
+        state: directory
+        mode: 0700
+
+    - name: Ensure .ssh config
+      file:
+        path: "/home/{{ username }}/.ssh/config"
+        owner: "{{ username }}"
+        group: "{{ username }}"
+        state: touch
+        mode: 0600
+
     - name: Ensure private key
       copy:
-      src: "{{ ssh_private_key }}"
-      path: $HOME/.ssh/phobos_key
-      mode: 400
+        src: "{{ ssh_private_key }}"
+        dest: "/home/{{ username }}/.ssh/phobos_key"
+        owner: "{{ username }}"
+        group: "{{ username }}"
+        mode: 0600
 
     - name: Ensure contents of ssh config
       blockinfile:
-        path: $HOME/.ssh/config
+        path: "/home/{{ username }}/.ssh/config"
         block: |
           # Phobos
           Host 172.20.*
@@ -24,14 +50,16 @@
 
     - name: Ensure contents of bashrc
       lineinfile:
-        path: $HOME/.bashrc
+        path: "/home/{{ username }}/.bashrc"
         line: "{{ item }}"
       with_items:
         - "eval $(ssh-agent -s)"
-        - "ssh-add ~/.ssh/id_rsa"
+        - "ssh-add $HOME/.ssh/phobos_key"
         - "source $HOME/openrc.sh"
 
     - name: Ensure contents of openrc.sh
       template:
         src: openrc.sh.j2
-        dest: $HOME/openrc.sh
+        dest: "/home/{{ username }}/openrc.sh"
+        owner: "{{ username }}"
+        group: "{{ username }}"

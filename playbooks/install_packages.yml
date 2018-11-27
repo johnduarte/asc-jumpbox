@@ -11,3 +11,4 @@
         - screen
         - tmux
         - ansible
+        - python-pip

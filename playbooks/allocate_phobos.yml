@@ -6,6 +6,9 @@
     - name: 'vm_keyname'
       prompt: "Enter Phobos keyname to provision the jump box with"
       private: no
+      when:
+        - vm_keyname is undefined
+        - vm_keyname != ""
 
   tasks:
     - name: Create inventory directory
@@ -16,6 +19,21 @@
     - name: Print instance name
       debug:
         msg: "Preparing to deploy - {{ instance_name }}"
+
+    - name: Check server uptime
+      os_server_facts:
+        server: "{{ instance_name }}"
+
+    - name: Set uptime
+      set_fact:
+        uptime: "{{
+                   (
+                     (ansible_date_time.iso8601 | to_datetime('%Y-%m-%dT%H:%M:%SZ'))
+                     - (openstack_servers[0].updated | to_datetime('%Y-%m-%dT%H:%M:%SZ'))
+                   ).seconds / 60
+                 }}"
+      when:
+        - (openstack_servers | length ) > 0
 
     - name: Provision a cloud instance
       block:
@@ -80,3 +98,6 @@
 
     - name: sleep for 3 minutes for bootstrap script to complete
       wait_for: timeout=180
+      when:
+        - uptime is undefined or
+          ( uptime | int ) < 5

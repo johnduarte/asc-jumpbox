@@ -1,0 +1,10 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: False
+
+  tasks:
+    - name: Print connection info
+      debug:
+        msg: "Jumpbox deployment complete.  You may now SSH to the jumpbox using the following command:
+              `ssh {{ username }}@{{ _instance_provision.server.accessIPv4 }}`"

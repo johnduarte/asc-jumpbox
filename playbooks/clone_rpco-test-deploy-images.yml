@@ -1,8 +1,17 @@
 ---
 - hosts: hosts
   remote_user: ubuntu
+  become: true
   tasks:
     - name: Clone rpc-openstack repo
       git:
         repo: https://github.com/rcbops/rpco-test-deploy-images
-        dest: $HOME/rpco-test-deploy-images
+        dest: "/home/{{ username }}/rpco-test-deploy-images"
+        version: master
+    - name: Set ownership on repo directory
+      file:
+        path: "/home/{{ username }}/rpco-test-deploy-images"
+        owner: "{{ username }}"
+        group: "{{ username }}"
+        state: directory
+        recurse: true
