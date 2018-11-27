@@ -10,6 +10,7 @@
       user:
         name: "{{ username }}"
         state: present
+        shell: /bin/bash
         create_home: True
 
     - name: Ensure .ssh directory
@@ -47,6 +48,15 @@
               StrictHostKeyChecking no
               UserKnownHostsFile /dev/null
               ServerAliveInterval 180
+
+    - name: Copy authorized_keys from ubuntu to user
+      copy:
+        remote_src: true
+        src: .ssh/authorized_keys
+        dest:  "/home/{{ username }}/.ssh/authorized_keys"
+        owner: "{{ username }}"
+        group: "{{ username }}"
+        mode: 0600
 
     - name: Ensure contents of bashrc
       lineinfile:
